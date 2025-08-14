@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ComeCat")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cfe94c0460670dd58b16af78b0a33be78462724b")]
 [assembly: System.Reflection.AssemblyProductAttribute("ComeCat")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ComeCat")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
