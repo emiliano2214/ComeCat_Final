@@ -1,0 +1,41 @@
+.gitignore para ComeCat_Final
+
+Visual Studio
+
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+Carpetas de compilación
+
+bin/
+obj/
+out/
+
+Rider
+
+.idea/
+
+Logs
+
+*.log
+
+Docker volumes y datos locales de contenedores
+
+**/data/
+**/log/
+**/config/
+
+Archivos temporales y de sistema
+
+*.tmp
+*.cache
+*.DS_Store
+
+Nota:
+
+Con este único .gitignore en la raíz del proyecto, se ignoran automáticamente las carpetas de compilación y datos de todos los contenedores y subproyectos,
+
+por lo que no es necesario crear un .gitignore en cada carpeta de servicio o proyecto individual.
