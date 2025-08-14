@@ -1,0 +1,100 @@
+services:
+  api:
+    build:
+      context: ./ServidorAPI
+    image: proyecto_comecat-api
+    container_name: api
+    ports:
+      - "5000:5000"
+    networks:
+      - red_gatos
+    volumes:
+      - api_data:/app/data   # Volumen nombrado para persistir datos de la API
+
+  db:
+    build:
+      context: ./ServidorBBDD
+    image: proyecto_comecat-db
+    container_name: db
+    ports:
+      - "5001:5001"
+    networks:
+      - red_gatos
+    volumes:
+      - datos_db:/db
+
+  blazor:
+    build:
+      context: ./ServidorBlazor
+    image: proyecto_comecat-blazor
+    container_name: blazor
+    ports:
+      - "5002:5002"
+    networks:
+      - red_gatos
+    volumes:
+      - blazor_data:/app/data
+
+  mqtt:
+    build:
+      context: ./ServidorMQTT
+    image: proyecto_comecat-mqtt
+    container_name: mqtt
+    ports:
+      - "1883:1883"
+    networks:
+      - red_gatos
+    volumes:
+      - mqtt_config:/mosquitto/config
+      - mqtt_data:/mosquitto/data
+      - mqtt_log:/mosquitto/log
+
+  servidorprueba:
+    build:
+      context: ./ServidorPrueba
+    image: proyecto_comecat-prueba
+    container_name: servidor_prueba
+    depends_on:
+      - api
+    networks:
+      - red_gatos
+    volumes:
+      - pruebas_data:/tests
+
+  servidorn8n:
+    build:
+      context: ./ServidorN8N
+      dockerfile: Dockerfile
+    image: proyecto_comecat-n8n
+    container_name: servidor_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_HOST=servidorn8n
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - red_gatos
+    depends_on:
+      - api
+      - mqtt
+      - db
+
+volumes:
+  api_data:
+  datos_db:
+  blazor_data:
+  mqtt_config:
+  mqtt_data:
+  mqtt_log:
+  pruebas_data:
+  n8n_data:
+
+networks:
+  red_gatos:
+    driver: bridge

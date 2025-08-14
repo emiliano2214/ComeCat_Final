@@ -1,0 +1,6 @@
+@ComeCat_HostAddress = http://localhost:5136
+
+GET {{ComeCat_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

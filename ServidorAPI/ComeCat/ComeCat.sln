@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36301.6 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComeCat", "ComeCat.csproj", "{68B748E6-9CAE-4B3B-B653-2D59CC355AB9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68B748E6-9CAE-4B3B-B653-2D59CC355AB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68B748E6-9CAE-4B3B-B653-2D59CC355AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68B748E6-9CAE-4B3B-B653-2D59CC355AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68B748E6-9CAE-4B3B-B653-2D59CC355AB9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4298BB4-1D69-4C1A-A4B9-9871A2701A21}
+	EndGlobalSection
+EndGlobal
