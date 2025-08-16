@@ -1,5 +1,4 @@
-
-namespace ComeCat
+﻿namespace ComeCat
 {
     public class Program
     {
@@ -7,16 +6,19 @@ namespace ComeCat
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            // 👉 Registramos los controladores
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+            // 👉 Registramos el HttpClientFactory (para poder inyectar HttpClient en los controladores)
+            builder.Services.AddHttpClient();
+
+            // Swagger (documentación de la API)
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configuración del pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -26,7 +28,6 @@ namespace ComeCat
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

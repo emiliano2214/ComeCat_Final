@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   api:
     build:
@@ -5,11 +7,16 @@ services:
     image: proyecto_comecat-api
     container_name: api
     ports:
-      - "5000:5000"
+      - "5007:8080"  # HTTP
+      - "5008:8081"  # HTTPS fijo
     networks:
       - red_gatos
     volumes:
-      - api_data:/app/data   # Volumen nombrado para persistir datos de la API
+      - api_data:/app/data
+    environment:
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+    restart: unless-stopped
 
   db:
     build:
@@ -17,7 +24,8 @@ services:
     image: proyecto_comecat-db
     container_name: db
     ports:
-      - "5001:5001"
+      - "5009:8080"   # HTTP DB
+      - "5010:8081"   # HTTPS DB
     networks:
       - red_gatos
     volumes:
@@ -29,7 +37,7 @@ services:
     image: proyecto_comecat-blazor
     container_name: blazor
     ports:
-      - "5002:5002"
+      - "5011:5002"  # HTTP Blazor
     networks:
       - red_gatos
     volumes:
@@ -41,7 +49,7 @@ services:
     image: proyecto_comecat-mqtt
     container_name: mqtt
     ports:
-      - "1883:1883"
+      - "5012:1883"   # MQTT
     networks:
       - red_gatos
     volumes:
@@ -58,6 +66,8 @@ services:
       - api
     networks:
       - red_gatos
+    ports:
+      - "5013:5004"  # Pruebas
     volumes:
       - pruebas_data:/tests
 
@@ -68,14 +78,12 @@ services:
     image: proyecto_comecat-n8n
     container_name: servidor_n8n
     ports:
-      - "5678:5678"
+      - "5014:5678"   # n8n accesible en puerto consecutivo
     environment:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=admin123
-      - N8N_HOST=servidorn8n
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_USER_MANAGEMENT_DISABLED=true   # permite login solo con usuario/contraseña
     volumes:
       - n8n_data:/home/node/.n8n
     networks:
