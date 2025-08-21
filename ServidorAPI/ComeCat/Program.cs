@@ -6,16 +6,22 @@
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // 👉 Registramos los controladores
+            // Registramos los controladores
             builder.Services.AddControllers();
 
-            // 👉 Registramos el HttpClientFactory (para poder inyectar HttpClient en los controladores)
-            builder.Services.AddHttpClient();
+            // Registramos el HttpClient apuntando al servicio Flask "db"
+            builder.Services.AddHttpClient("DispensadorApi", client =>
+            {
+                client.BaseAddress = new Uri("http://db:5002/");
+            });
 
             // Swagger (documentación de la API)
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Exponemos la API en el puerto 5007 dentro del contenedor
             builder.WebHost.UseUrls("http://0.0.0.0:5000");
+
             var app = builder.Build();
 
             // Configuración del pipeline
@@ -26,9 +32,7 @@
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

@@ -17,7 +17,7 @@ namespace ComeCat.Controllers
         {
             _http = httpClientFactory.CreateClient();
             // Importante: en docker-compose el hostname del servicio es "db"
-            _http.BaseAddress = new Uri("http://db:5001/");
+            _http.BaseAddress = new Uri("http://db:5002/");
         }
 
         [HttpGet]

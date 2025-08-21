@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComeCat", "ComeCat.csproj",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComeCat.Entites", "..\ComeCat.Entites\ComeCat.Entites.csproj", "{495C8F72-3462-40B6-A53B-2E11A66C2031}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComeCat.Services", "..\ComeCat.Services\ComeCat.Services.csproj", "{22CBAEBE-F9C9-465F-B8BB-058631694350}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{495C8F72-3462-40B6-A53B-2E11A66C2031}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{495C8F72-3462-40B6-A53B-2E11A66C2031}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{495C8F72-3462-40B6-A53B-2E11A66C2031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22CBAEBE-F9C9-465F-B8BB-058631694350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22CBAEBE-F9C9-465F-B8BB-058631694350}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22CBAEBE-F9C9-465F-B8BB-058631694350}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22CBAEBE-F9C9-465F-B8BB-058631694350}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
