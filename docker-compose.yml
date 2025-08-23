@@ -13,7 +13,7 @@ services:
     volumes:
       - api_data:/app/data
     environment:
-      - ASPNETCORE_URLS=https://+:5000;http://+:5000
+      - "ASPNETCORE_URLS=https://+:5000;http://+:5000"
       - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
 
@@ -23,7 +23,7 @@ services:
     image: proyecto_comecat-db
     container_name: db
     ports:
-      - "5002:5002"   # ✅ puerto externo = puerto interno = 5002
+      - "5002:5002"
     networks:
       - red_gatos
     volumes:
@@ -91,6 +91,26 @@ services:
       - mqtt
       - db
 
+  servidorn8n_test:
+    build:
+      context: ./ServidorN8N
+      dockerfile: Dockerfile
+    image: proyecto_comecat-n8n-test
+    container_name: servidor_n8n_test
+    ports:
+      - "5680:5678" # Puerto diferente para no chocar con el viejo
+    environment:
+      - N8N_USER_MANAGEMENT_DEFAULT_EMAIL=emi02214@gmail.com
+      - N8N_USER_MANAGEMENT_DEFAULT_PASSWORD=456emi456
+    volumes:
+      - n8n_data_test:/home/node/.n8n # Volumen separado para pruebas
+    networks:
+      - red_gatos
+    depends_on:
+      - api
+      - mqtt
+      - db
+
 volumes:
   api_data:
   datos_db:
@@ -100,6 +120,7 @@ volumes:
   mqtt_log:
   pruebas_data:
   n8n_data:
+  n8n_data_test: # Volumen del nuevo n8n
 
 networks:
   red_gatos:
