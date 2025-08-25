@@ -2,33 +2,31 @@ from flask import Flask, jsonify, request
 import sqlite3
 
 app = Flask(__name__)
+DB_FILE = "gatos_resultados.db"  # Una sola DB para todo
 
 def get_connection():
-    return sqlite3.connect("gatos.db")
+    return sqlite3.connect(DB_FILE)
 
-# ---------- STATUS ----------
+# ----------------- STATUS -----------------
 @app.route('/db/status')
 def db_status():
-    return jsonify({"db": "Conectado a SQLite"})
+    return jsonify({"db": "Conectado a SQLite - Unificada"})
 
-# ---------- GET ALL ----------
+# ----------------- REGISTRO DISPENSADOR -----------------
 @app.route('/db/dispensadores', methods=['GET'])
-def get_all():
+def get_all_dispensadores():
     con = get_connection()
     cur = con.cursor()
     cur.execute("SELECT * FROM RegistroDispensador")
     rows = cur.fetchall()
     con.close()
-    result = [
+    return jsonify([
         {"Id": r[0], "Proximidad": r[1], "ServoActivo": r[2],
-         "FechaDispensacion": r[3], "HoraDispensacion": r[4]}
-        for r in rows
-    ]
-    return jsonify(result)
+         "FechaDispensacion": r[3], "HoraDispensacion": r[4]} for r in rows
+    ])
 
-# ---------- GET BY ID ----------
 @app.route('/db/dispensadores/<int:id>', methods=['GET'])
-def get_by_id(id):
+def get_dispensador_by_id(id):
     con = get_connection()
     cur = con.cursor()
     cur.execute("SELECT * FROM RegistroDispensador WHERE Id=?", (id,))
@@ -37,12 +35,10 @@ def get_by_id(id):
     if row:
         return jsonify({"Id": row[0], "Proximidad": row[1], "ServoActivo": row[2],
                         "FechaDispensacion": row[3], "HoraDispensacion": row[4]})
-    else:
-        return jsonify({"error": "No encontrado"}), 404
+    return jsonify({"error": "No encontrado"}), 404
 
-# ---------- INSERT ----------
 @app.route('/db/dispensadores', methods=['POST'])
-def add():
+def add_dispensador():
     data = request.get_json()
     con = get_connection()
     cur = con.cursor()
@@ -56,10 +52,45 @@ def add():
     con.close()
     return jsonify({"Id": new_id}), 201
 
-# ---------- BLOQUE PRINCIPAL ----------
-if __name__ == '__main__':
-    # Asegurar que la tabla exista
-    con = sqlite3.connect("gatos.db")
+# ----------------- RESULTADOS TEST -----------------
+@app.route('/db/resultados', methods=['GET'])
+def get_all_resultados():
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("SELECT * FROM ResultadosTest")
+    rows = cur.fetchall()
+    con.close()
+    return jsonify([{"Id": r[0], "Mensaje": r[1], "Fecha": r[2]} for r in rows])
+
+@app.route('/db/resultados/<int:id>', methods=['GET'])
+def get_resultado_by_id(id):
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("SELECT * FROM ResultadosTest WHERE Id=?", (id,))
+    row = cur.fetchone()
+    con.close()
+    if row:
+        return jsonify({"Id": row[0], "Mensaje": row[1], "Fecha": row[2]})
+    return jsonify({"error": "No encontrado"}), 404
+
+@app.route('/db/resultados', methods=['POST'])
+def add_resultado():
+    data = request.get_json()
+    if "Mensaje" not in data or not data["Mensaje"]:
+        return jsonify({"error": "Mensaje requerido"}), 400
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("""INSERT INTO ResultadosTest (Mensaje, Fecha)
+                   VALUES (?, datetime('now'))""",
+                (data["Mensaje"],))
+    con.commit()
+    new_id = cur.lastrowid
+    con.close()
+    return jsonify({"Id": new_id}), 201
+
+# ----------------- CREAR TABLAS -----------------
+def init_db():
+    con = sqlite3.connect(DB_FILE)
     con.execute("""
         CREATE TABLE IF NOT EXISTS RegistroDispensador (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,23 +100,15 @@ if __name__ == '__main__':
             HoraDispensacion TEXT NOT NULL
         )
     """)
-
-    # Insertar un registro inicial si no existe
-    cur = con.cursor()
-    cur.execute("""
-        SELECT COUNT(*) FROM RegistroDispensador 
-        WHERE Proximidad=? AND ServoActivo=? AND FechaDispensacion=? AND HoraDispensacion=?
-    """, (12.5, 1, "2025-08-17", "19:20:00"))
-    
-    if cur.fetchone()[0] == 0:
-        cur.execute("""
-            INSERT INTO RegistroDispensador (Proximidad, ServoActivo, FechaDispensacion, HoraDispensacion)
-            VALUES (?, ?, ?, ?)
-        """, (12.5, 1, "2025-08-17", "19:20:00"))
-        con.commit()
-        print("Registro inicial agregado.")
-
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS ResultadosTest (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Mensaje TEXT NOT NULL,
+            Fecha TEXT NOT NULL
+        )
+    """)
     con.close()
 
-    # Ejecutar servidor Flask en el puerto correcto
+if __name__ == '__main__':
+    init_db()
     app.run(host='0.0.0.0', port=5002)
