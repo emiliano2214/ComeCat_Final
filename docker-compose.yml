@@ -33,7 +33,7 @@ services:
     image: proyecto_comecat-blazor
     container_name: blazor
     ports:
-      - "5003:5003"
+      - "5003:80"
     networks:
       - red_gatos
     volumes:
