@@ -13,7 +13,9 @@ namespace ComeCat.Services
         private readonly MqttClientOptions _mqttOptions;
         private readonly HttpClient _httpClient;
 
-        // Inyectamos HttpClient directamente
+        private int _distancia;
+        private bool _servo;
+
         public MqttService(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -22,29 +24,17 @@ namespace ComeCat.Services
             _mqttClient = factory.CreateMqttClient();
 
             _mqttOptions = new MqttClientOptionsBuilder()
-                .WithTcpServer("mqtt", 1883) // Nombre del servicio MQTT en docker
+                .WithTcpServer("mqtt", 1883)
                 .Build();
 
             _mqttClient.ConnectedAsync += async e =>
             {
                 Console.WriteLine("Conectado a MQTT broker");
 
-                await _mqttClient.SubscribeAsync("gatos/dispensador");
-                Console.WriteLine("Suscrito al tópico: gatos/dispensador");
-            };
+                await _mqttClient.SubscribeAsync("dispensador/distancia");
+                await _mqttClient.SubscribeAsync("dispensador/servo");
 
-            _mqttClient.DisconnectedAsync += async e =>
-            {
-                Console.WriteLine("Desconectado de MQTT, reintentando en 5s...");
-                await Task.Delay(5000);
-                try
-                {
-                    await _mqttClient.ConnectAsync(_mqttOptions);
-                }
-                catch
-                {
-                    Console.WriteLine("Error reconectando al broker");
-                }
+                Console.WriteLine("Suscrito a tópicos: dispensador/distancia, dispensador/servo");
             };
 
             _mqttClient.ApplicationMessageReceivedAsync += async e =>
@@ -54,15 +44,27 @@ namespace ComeCat.Services
                     var payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
                     Console.WriteLine($"Mensaje MQTT recibido en {e.ApplicationMessage.Topic}: {payload}");
 
-                    var data = JsonSerializer.Deserialize<RegistroDispensador>(payload, new JsonSerializerOptions
+                    if (e.ApplicationMessage.Topic == "dispensador/distancia")
                     {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (data != null)
-                    {
-                        await GuardarEnDb(data);
+                        if (int.TryParse(payload, out var distancia))
+                            _distancia = distancia;
                     }
+                    else if (e.ApplicationMessage.Topic == "dispensador/servo")
+                    {
+                        if (bool.TryParse(payload, out var servo))
+                            _servo = servo;
+                    }
+
+                    // Creamos objeto con valores actuales
+                    var registro = new RegistroDispensador
+                    {
+                        Proximidad = _distancia,
+                        ServoActivo = _servo ? 1 : 0,
+                        FechaDispensacion = DateTime.Now.ToString("yyyy-MM-dd"),
+                        HoraDispensacion = DateTime.Now.ToString("HH:mm:ss")
+                    };
+
+                    await GuardarEnApi(registro);
                 }
                 catch (Exception ex)
                 {
@@ -71,34 +73,28 @@ namespace ComeCat.Services
             };
         }
 
-        private async Task GuardarEnDb(RegistroDispensador registro)
+        private async Task GuardarEnApi(RegistroDispensador registro)
         {
             try
             {
-                // Usamos directamente el HttpClient inyectado
-                var json = JsonSerializer.Serialize(new
-                {
-                    Proximidad = registro.Proximidad,
-                    ServoActivo = registro.ServoActivo,
-                    FechaDispensacion = registro.FechaDispensacion,
-                    HoraDispensacion = registro.HoraDispensacion
-                });
-
+                var json = JsonSerializer.Serialize(registro);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("db/dispensadores", content);
+                // 👉 Ahora apuntamos a nuestra propia API
+                var response = await _httpClient.PostAsync("http://localhost:5000/api/dispensador", content);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("Registro guardado en DB correctamente");
+                    Console.WriteLine("Registro enviado a API correctamente");
                 }
                 else
                 {
-                    Console.WriteLine($"Error al guardar en DB: {response.StatusCode}");
+                    Console.WriteLine($"Error al enviar a API: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Excepción al guardar en DB: {ex.Message}");
+                Console.WriteLine($"Excepción al enviar a API: {ex.Message}");
             }
         }
 

@@ -9,18 +9,19 @@
             // Registramos los controladores
             builder.Services.AddControllers();
 
-            // Registramos el HttpClient apuntando al servicio Flask "db"
-            builder.Services.AddHttpClient("DispensadorApi", client =>
+            // Registramos Swagger (documentación de la API)
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            // Registramos HttpClient configurado para MqttService
+            builder.Services.AddHttpClient<ComeCat.Services.MqttService>(client =>
             {
+                // Este "db" es el hostname del contenedor Flask en la red de Docker
                 client.BaseAddress = new Uri("http://db:5002/");
             });
 
-            // Registramos MqttService
+            // Registramos MqttService como servicio en segundo plano
             builder.Services.AddHostedService<ComeCat.Services.MqttService>();
-
-            // Swagger (documentación de la API)
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
             // Exponemos la API en el puerto 5000 dentro del contenedor
             builder.WebHost.UseUrls("http://0.0.0.0:5000");
