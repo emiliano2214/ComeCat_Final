@@ -15,6 +15,9 @@
                 client.BaseAddress = new Uri("http://db:5002/");
             });
 
+            // Registramos MqttService
+            builder.Services.AddHostedService<ComeCat.Services.MqttService>();
+
             // Swagger (documentación de la API)
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
